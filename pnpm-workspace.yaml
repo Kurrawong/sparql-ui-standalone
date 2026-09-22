@@ -1,0 +1,6 @@
+allowBuilds:
+  '@fortawesome/fontawesome-common-types': true
+  '@fortawesome/free-solid-svg-icons': true
+onlyBuiltDependencies:
+  - "@fortawesome/fontawesome-common-types"
+  - "@fortawesome/free-solid-svg-icons"

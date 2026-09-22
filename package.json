@@ -1,0 +1,26 @@
+{
+	"name": "sparql-ui-standalone",
+	"version": "0.1.0",
+	"private": true,
+	"description": "Standalone, themeable SPARQL query UI (Yasgui) that runs as a static site with no backend framework required",
+	"type": "module",
+	"scripts": {
+		"dev": "vite",
+		"build": "vue-tsc --noEmit && vite build",
+		"types": "vue-tsc --noEmit",
+		"preview": "vite preview",
+		"preinstall": "npx only-allow pnpm"
+	},
+	"dependencies": {
+		"@triply/yasgui": "^4.2.28",
+		"vue": "^3.5.40"
+	},
+	"devDependencies": {
+		"@tailwindcss/vite": "^4.3.3",
+		"@vitejs/plugin-vue": "^6.0.8",
+		"tailwindcss": "^4.3.3",
+		"typescript": "^6.0.3",
+		"vite": "^8.2.0",
+		"vue-tsc": "^3.3.9"
+	}
+}
