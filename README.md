@@ -19,7 +19,7 @@ To get started, copy the example endpoints file and edit it:
 cp src/endpoints.example.json src/endpoints.json
 ```
 
-Without this file, the dropdown is simply empty. `src/endpoints.config.ts` globs `src/endpoints.json` in at build time. See "Keeping real credentials out of git and out of AI-agent context" below for what this does and doesn't protect against.
+Without this file, the dropdown is simply empty. `src/endpoints.ts` globs `src/endpoints.json` in at build time. See "Keeping real credentials out of git and out of AI-agent context" below for what this does and doesn't protect against.
 
 ## Build
 
@@ -34,7 +34,7 @@ pnpm preview
 
 All components use Tailwind's semantic utility classes (`bg-background`, `text-foreground`, `border-border`, ...). Those classes are generated from the `@theme` tokens in `src/theme.css`. Reskinning the app means editing that one file -- no component changes needed.
 
-For anything beyond colors and fonts (e.g. logo, extra footer link), use `AppShell.vue`'s `logo` and `footer` slots and its `title` prop instead of forking the component. `SparqlEditor.vue` itself has no theming seams, since there's nothing org-specific about a query editor.
+For anything beyond colors and fonts, use `AppShell.vue`'s `title` prop and `logo` slot, or replace the whole bar with its `header`/`footer` slots, instead of forking the component. `SparqlEditor.vue` itself has no theming seams, since there's nothing org-specific about a query editor.
 
 ## Docker
 
@@ -56,25 +56,36 @@ This repo isn't published to a package registry yet. A consuming project can dep
 pnpm add git+https://github.com/Kurrawong/sparql-ui-standalone.git#v0.1.0
 ```
 
-and import `SparqlEditor.vue` / `AppShell.vue` / `useSparqlEndpoint.ts` directly by path in its own app, alongside its own `theme.css`. Moving to a published package later only changes that install line — the internal structure and exports stay the same.
+and import `SparqlEditor.vue` / `AppShell.vue` directly by path in its own app. Moving to a published package later only changes that install line.
 
-`SparqlEditor.vue` accepts optional `endpoints`/`sampleQueries` props (each matching the exported `SparqlEndpointConfig[]`/`SampleQuery[]` shapes) so a downstream app can supply its own list instead of this repo's built-in ones — the built-in `src/endpoints.config.ts`/`src/queries.ts` are only the defaults used when no props are passed:
+A downstream app contains only config, laid out the same way as this repo:
+
+```
+src/
+├── App.vue                # AppShell + SparqlEditor, plus its own header/footer slots
+├── main.ts                # standard Vite entry: createApp(App).mount("#app") + import "./theme.css"
+├── theme.css              # @import "sparql-ui-standalone/src/theme.css"; then @theme overrides
+├── endpoints.json         # gitignored; endpoints.example.json committed as a template
+└── queries/*.rq           # sample queries
+```
+
+No glue code is needed: this repo's `src/endpoints.ts` and `src/queries.ts` glob `/src/endpoints.json` and `/src/queries/*.rq`, and Vite resolves a leading `/` from the root of the app being built. That means they pick up the downstream app's files automatically. Likewise, `src/theme.css` declares `@source "./components"`, so importing it generates the utility classes these components need even from `node_modules`.
 
 ```vue
 <script lang="ts" setup>
 import AppShell from "sparql-ui-standalone/src/components/AppShell.vue";
 import SparqlEditor from "sparql-ui-standalone/src/components/SparqlEditor.vue";
-import { sparqlEndpoints } from "./endpoints.config";
-import { sampleQueries } from "./queries";
 </script>
 
 <template>
 	<AppShell title="Your App">
 		<template #logo><strong>Your</strong>Org</template>
-		<SparqlEditor :endpoints="sparqlEndpoints" :sample-queries="sampleQueries" />
+		<SparqlEditor />
 	</AppShell>
 </template>
 ```
+
+`SparqlEditor.vue` also accepts optional `endpoints`/`sampleQueries` props (`SparqlEndpointConfig[]`/`SampleQuery[]`). They're for hosts that build these lists programmatically instead of from files, such as prez-ui later on.
 
 ### Credential ignoring
 

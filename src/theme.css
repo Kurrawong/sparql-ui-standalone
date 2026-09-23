@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+/* Relative to this file, so a downstream app importing this stylesheet from
+   node_modules still generates the utility classes our components use. */
+@source "./components";
+
 @theme {
 	--color-primary: oklch(0.55 0.18 255);
 	--color-background: oklch(1 0 0);

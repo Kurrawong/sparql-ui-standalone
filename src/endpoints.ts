@@ -14,7 +14,7 @@ export interface SparqlEndpointConfig {
 
 // The endpoint list lives entirely in src/endpoints.json
 // Copy src/endpoints.example.json to get started — see README.md.
-const files = import.meta.glob("./endpoints.json", {
+const files = import.meta.glob("/src/endpoints.json", {
 	eager: true,
 	import: "default",
 }) as Record<string, SparqlEndpointConfig[]>;

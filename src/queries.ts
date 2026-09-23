@@ -4,14 +4,17 @@ export interface SampleQuery {
 	query: string;
 }
 
-// Add a sample query by dropping a new .rq file in src/sample-queries/ — no
-// code changes needed. The first two lines are always title then
-// description, the rest is the query itself:
+// Add a sample query by dropping a new .rq file in src/queries/ — no code
+// changes needed. Optional leading comment lines set the title and
+// description; both are optional and default to "Untitled" / blank:
 //
 //   # title: Your title
 //   # description: One sentence shown next to the title.
 //   SELECT * WHERE { ... }
-const files = import.meta.glob("./queries/*.rq", {
+//
+// The leading "/" makes Vite resolve this from the root of the app being
+// built, so a downstream app's own src/queries/ is picked up automatically.
+const files = import.meta.glob("/src/queries/*.rq", {
 	eager: true,
 	query: "?raw",
 	import: "default",
@@ -19,10 +22,23 @@ const files = import.meta.glob("./queries/*.rq", {
 
 function parseSampleQuery(raw: string): SampleQuery {
 	const lines = raw.split("\n");
-	const title = lines[0].replace(/^#\s*title:\s*/i, "").trim() || "Untitled";
-	const description = lines[1].replace(/^#\s*description:\s*/i, "").trim();
+	let cursor = 0;
+	let title = "Untitled";
+	let description = "";
 
-	return { title, description, query: lines.slice(2).join("\n").trim() };
+	const titleMatch = lines[cursor]?.match(/^#\s*title:\s*(.*)$/i);
+	if (titleMatch) {
+		title = titleMatch[1].trim() || "Untitled";
+		cursor++;
+	}
+
+	const descriptionMatch = lines[cursor]?.match(/^#\s*description:\s*(.*)$/i);
+	if (descriptionMatch) {
+		description = descriptionMatch[1].trim();
+		cursor++;
+	}
+
+	return { title, description, query: lines.slice(cursor).join("\n").trim() };
 }
 
 export const sampleQueries: SampleQuery[] = Object.keys(files)
