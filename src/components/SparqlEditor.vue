@@ -3,7 +3,7 @@ import { onMounted, ref, useTemplateRef } from "vue";
 import Yasgui from "@triply/yasgui";
 import "@triply/yasgui/build/yasgui.min.css";
 import { sparqlEndpoints } from "../endpoints.config";
-import { sampleQueries, type SampleQuery } from "../queries.config";
+import { sampleQueries, type SampleQuery } from "../queries";
 import { getSelectedEndpoint, setSelectedEndpoint, selectedEndpointName } from "../composables/useSparqlEndpoint";
 
 const containerRef = useTemplateRef<HTMLDivElement>("container");

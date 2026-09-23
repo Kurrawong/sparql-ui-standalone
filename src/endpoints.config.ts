@@ -14,12 +14,12 @@ export interface SparqlEndpointConfig {
 
 export const sparqlEndpoints: SparqlEndpointConfig[] = [
 	{
-		name: "OSPD",
-		endpoint: "https://api.ospd.dev.kurrawong.ai/sparql",
+		name: "Wikidata",
+		endpoint: "https://query.wikidata.org/sparql",
 	},
 	{
-		name: "Pidreg",
-		endpoint: "https://api.pidreg.dev.kurrawong.ai/sparql",
+		name: "DBPedia",
+		endpoint: "http://dbpedia.org/sparql",
 	},
 	// Add more named endpoints here, e.g.:
 	// { name: "GraphDB", endpoint: "https://...", username: "...", password: "..." },
