@@ -133,13 +133,6 @@ onMounted(() => {
 	gap: 6px;
 }
 
-/* Tailwind's preflight strips the native border off every input and Yasgui never sets its own, which makes it confusing. */
-.yasgui .tableFilter {
-	border: 1px solid var(--color-border);
-	border-radius: 4px;
-	padding-inline: 6px;
-}
-
 /* Dead link to Triply's docs, and an error-state link not useful here. */
 .yasgui .yasr_external_ref_btn,
 .yasgui .yasr_tryQuery {
