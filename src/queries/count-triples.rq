@@ -1,0 +1,5 @@
+# title: Count all triples
+# description: The total number of triples in the dataset.
+SELECT (COUNT(*) AS ?count) WHERE {
+    ?subject ?predicate ?object .
+}

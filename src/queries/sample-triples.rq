@@ -1,0 +1,5 @@
+# title: Sample triples
+# description: The first 10 triples in the dataset, in no particular order.
+SELECT * WHERE {
+    ?subject ?predicate ?object .
+} LIMIT 10

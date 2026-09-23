@@ -1,0 +1,5 @@
+# title: List classes in use
+# description: Distinct rdf:type values, a quick way to see what kinds of things are in an unfamiliar dataset.
+SELECT DISTINCT ?class WHERE {
+    ?subject a ?class .
+} LIMIT 25
