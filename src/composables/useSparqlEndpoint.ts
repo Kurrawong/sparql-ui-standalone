@@ -1,20 +1,26 @@
-const STORAGE_KEY = "sparqlUiEndpoint";
+import { ref } from "vue";
+import { sparqlEndpoints, type SparqlEndpointConfig } from "../endpoints.config";
 
-/**
- * Resolves the SPARQL endpoint to open the editor with: an `?endpoint=`
- * query param (which also persists the choice), then a value the user
- * previously set, then the build-time default (VITE_SPARQL_ENDPOINT).
- */
-export function getSparqlEndpoint(): string {
-    const queryOverride = new URLSearchParams(window.location.search).get("endpoint");
-    if (queryOverride) {
-        setSparqlEndpoint(queryOverride);
-        return queryOverride;
-    }
+const STORAGE_KEY = "sparqlUiEndpointName";
 
-    return localStorage.getItem(STORAGE_KEY) || import.meta.env.VITE_SPARQL_ENDPOINT || "";
+function resolveInitialName(): string {
+	const queryName = new URLSearchParams(window.location.search).get("endpoint");
+	if (queryName) {
+		localStorage.setItem(STORAGE_KEY, queryName);
+		return queryName;
+	}
+
+	return localStorage.getItem(STORAGE_KEY) || sparqlEndpoints[0]?.name || "";
 }
 
-export function setSparqlEndpoint(endpoint: string): void {
-    localStorage.setItem(STORAGE_KEY, endpoint);
+/** Reactive across the app, e.g. so the footer can show the active endpoint. */
+export const selectedEndpointName = ref(resolveInitialName());
+
+export function getSelectedEndpoint(): SparqlEndpointConfig {
+	return sparqlEndpoints.find((entry) => entry.name === selectedEndpointName.value) ?? sparqlEndpoints[0];
+}
+
+export function setSelectedEndpoint(name: string): void {
+	selectedEndpointName.value = name;
+	localStorage.setItem(STORAGE_KEY, name);
 }

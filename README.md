@@ -6,9 +6,12 @@ Standalone SPARQL query UI built on [Yasgui](https://github.com/zazuko/Yasgui) (
 
 ```bash
 pnpm install
-cp .env.example .env   # set VITE_SPARQL_ENDPOINT to your SPARQL endpoint
 pnpm dev
 ```
+
+## Configuring endpoints
+
+The SPARQL endpoints shown in the dropdown are listed in `src/endpoints.config.ts` — a plain typed array, edited directly rather than via environment variables. Each entry has a `name`, `endpoint` URL, and optional `username`/`password` for HTTP Basic Auth. This is a static SPA with no backend, so anything in that file (including credentials) ships in plain text in the built JS bundle and is readable by anyone who opens devtools — fine for shared/low-sensitivity credentials, not for anything that needs to stay hidden from the app's own users.
 
 ## Build
 
@@ -30,9 +33,7 @@ For anything beyond colors and fonts (e.g. logo, extra footer link), use `AppShe
 A reference `Dockerfile` and `nginx.conf` are provided under `docker/` — they build the app and serve the static output with nginx:
 
 ```bash
-docker build -f docker/Dockerfile \
-  --build-arg VITE_SPARQL_ENDPOINT=https://example.org/sparql \
-  -t sparql-ui-standalone .
+docker build -f docker/Dockerfile -t sparql-ui-standalone .
 docker run --rm -p 8080:80 sparql-ui-standalone
 # → http://localhost:8080
 ```

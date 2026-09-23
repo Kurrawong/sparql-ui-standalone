@@ -11,9 +11,6 @@ RUN pnpm install --frozen-lockfile
 
 COPY . .
 
-ARG VITE_SPARQL_ENDPOINT
-ENV VITE_SPARQL_ENDPOINT=$VITE_SPARQL_ENDPOINT
-
 RUN pnpm build
 
 FROM nginx:stable-alpine
