@@ -1,0 +1,16 @@
+[
+	{
+		"name": "Wikidata",
+		"endpoint": "https://query.wikidata.org/sparql"
+	},
+	{
+		"name": "DBPedia",
+		"endpoint": "http://dbpedia.org/sparql"
+	},
+	{
+		"name": "GraphDB",
+		"endpoint": "https://example.org/repositories/example",
+		"username": "example-username",
+		"password": "example-password"
+	}
+]

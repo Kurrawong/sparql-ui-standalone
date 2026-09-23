@@ -12,15 +12,11 @@ export interface SparqlEndpointConfig {
 	password?: string;
 }
 
-export const sparqlEndpoints: SparqlEndpointConfig[] = [
-	{
-		name: "Wikidata",
-		endpoint: "https://query.wikidata.org/sparql",
-	},
-	{
-		name: "DBPedia",
-		endpoint: "http://dbpedia.org/sparql",
-	},
-	// Add more named endpoints here, e.g.:
-	// { name: "GraphDB", endpoint: "https://...", username: "...", password: "..." },
-];
+// The endpoint list lives entirely in src/endpoints.json
+// Copy src/endpoints.example.json to get started — see README.md.
+const files = import.meta.glob("./endpoints.json", {
+	eager: true,
+	import: "default",
+}) as Record<string, SparqlEndpointConfig[]>;
+
+export const sparqlEndpoints: SparqlEndpointConfig[] = Object.values(files).flat();

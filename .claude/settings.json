@@ -1,0 +1,5 @@
+{
+    "permissions": {
+        "deny": ["Read(src/endpoints.json)", "Edit(src/endpoints.json)", "Grep(src/endpoints.json)"]
+    }
+}
