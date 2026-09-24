@@ -58,6 +58,12 @@ pnpm add git+https://github.com/Kurrawong/sparql-ui-standalone.git#v0.1.0
 
 and import `SparqlEditor.vue` / `AppShell.vue` directly by path in its own app. Moving to a published package later only changes that install line.
 
+Because the components are consumed as source, the app must also depend on `@triply/yasgui` (and `vue`) directly, the same way `create-prez-app`'s template lists prez-ui's dependencies. Otherwise `vue-tsc` can't resolve them from the package's `.vue` files under pnpm:
+
+```bash
+pnpm add @triply/yasgui@^4.2.28
+```
+
 A downstream app contains only config, laid out the same way as this repo:
 
 ```

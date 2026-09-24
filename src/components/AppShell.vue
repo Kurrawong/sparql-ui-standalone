@@ -15,7 +15,7 @@ withDefaults(
 				<h1 class="text-lg font-semibold">{{ title }}</h1>
 			</header>
 		</slot>
-		<main class="flex-1">
+		<main class="flex-1 pb-10">
 			<slot />
 		</main>
 		<slot name="footer">
