@@ -8,8 +8,7 @@
 		"dev": "vite",
 		"build": "vue-tsc --noEmit && vite build",
 		"types": "vue-tsc --noEmit",
-		"preview": "vite preview",
-		"preinstall": "npx only-allow pnpm"
+		"preview": "vite preview"
 	},
 	"dependencies": {
 		"@triply/yasgui": "^4.2.28",

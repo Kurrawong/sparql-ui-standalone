@@ -28,15 +28,20 @@ function authHeaders(username?: string, password?: string): Record<string, strin
 	return {};
 }
 
-function handleEndpointChange(event: Event) {
-	setSelectedEndpoint((event.target as HTMLSelectElement).value);
-
+// Yasgui restores saved tabs (with their old endpoint and headers) from
+// localStorage, so each tab must be re-pointed at the dropdown's choice.
+function applySelectedEndpoint(tabId?: string) {
 	const entry = getSelectedEndpoint(endpoints.value);
-	const tab = yasgui?.getTab();
+	const tab = yasgui?.getTab(tabId);
 	if (!tab) return;
 
 	tab.setEndpoint(entry.endpoint);
 	tab.setRequestConfig({ headers: authHeaders(entry.username, entry.password) });
+}
+
+function handleEndpointChange(event: Event) {
+	setSelectedEndpoint((event.target as HTMLSelectElement).value);
+	applySelectedEndpoint();
 }
 
 function loadSampleQuery(entry: SampleQuery) {
@@ -61,6 +66,9 @@ onMounted(() => {
 		copyEndpointOnNewTab: true,
 		autofocus: true,
 	});
+	applySelectedEndpoint();
+	// Fires before the new tab becomes current, so target it by id.
+	yasgui.on("tabSelect", (_yasgui: Yasgui, tabId: string) => applySelectedEndpoint(tabId));
 });
 </script>
 
