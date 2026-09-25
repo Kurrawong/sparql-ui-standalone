@@ -13,7 +13,6 @@ function resolveInitialName(): string {
 	return localStorage.getItem(STORAGE_KEY) || "";
 }
 
-/** Reactive across the app, e.g. so a header/footer can show the active endpoint. */
 export const selectedEndpointName = ref(resolveInitialName());
 
 export function getSelectedEndpoint(): SparqlEndpointConfig {

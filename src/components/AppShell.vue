@@ -18,8 +18,6 @@ withDefaults(
 		<main class="flex-1 pb-10">
 			<slot />
 		</main>
-		<slot name="footer">
-			<footer class="px-6 py-4 text-sm opacity-70" />
-		</slot>
+		<slot name="footer" />
 	</div>
 </template>

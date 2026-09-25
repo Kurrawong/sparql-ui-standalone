@@ -1,7 +1,5 @@
-// Platform-neutral SPARQL proxy for /api/sparql/<id>: forwards the query to
-// SPARQL_<ID>_ENDPOINT, adding a Basic auth header from SPARQL_<ID>_USERNAME and
-// SPARQL_<ID>_PASSWORD, so credentials never reach the browser
-// `request` needs `headers.get()` and `text()`, like a Fetch or Azure Functions request
+// Forwards a query for /api/sparql/<id> to SPARQL_<ID>_ENDPOINT, adding Basic auth from
+// SPARQL_<ID>_USERNAME / _PASSWORD. `request` needs `headers.get()` and `text()`.
 export async function proxySparql(id, request, env) {
 	if (!/^\w+$/.test(id)) return { status: 404, body: "Invalid SPARQL endpoint id" };
 

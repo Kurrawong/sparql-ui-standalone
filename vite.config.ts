@@ -4,7 +4,8 @@ import tailwindcss from "@tailwindcss/vite";
 import { sparqlProxy } from "./proxy/vite-plugin.js";
 
 export default defineConfig({
-	plugins: [vue(), tailwindcss(), sparqlProxy()], // proxy plugin just for dev
-	// Yasgui's CSS contains old IE-only hacks (e.g. *zoom) that LightningCSS rejects.
-	css: { lightningcss: { errorRecovery: true } },
+	// sparqlProxy only runs under `pnpm dev`.
+	plugins: [vue(), tailwindcss(), sparqlProxy()],
+	// LightningCSS drops whole rules around the old IE hacks in Yasgui's CSS, which breaks some styling
+	build: { cssMinify: false },
 });

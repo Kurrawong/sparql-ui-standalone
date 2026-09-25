@@ -11,9 +11,8 @@ const sidebarOpen = ref(true);
 
 let yasgui: Yasgui | undefined;
 
-// Yasgui restores saved tabs (with their old endpoint and headers) from
-// localStorage, so each tab must be re-pointed at the dropdown's choice.
-// Headers are cleared because credentials only ever live server-side.
+// Yasgui restores saved tabs, with their old endpoint and headers, from localStorage.
+// Point each tab at the dropdown's endpoint and clear stale headers.
 function applySelectedEndpoint(tabId?: string) {
 	const tab = yasgui?.getTab(tabId);
 	if (!tab) return;
@@ -55,7 +54,7 @@ onMounted(() => {
 </script>
 
 <template>
-	<div class="sparql-editor px-5">
+	<div class="px-5">
 		<p v-if="endpoints.length === 0" class="p-3 text-sm">No endpoints configured.</p>
 
 		<template v-else>
@@ -118,38 +117,25 @@ onMounted(() => {
 </template>
 
 <style>
-/*
- * Yasgui builds its results/editor UI as plain DOM (document.createElement),
- * not through Vue templates, so Vue's scoped CSS has nothing to attach to.
- *
- * Several of the rules below only exist because Tailwind's preflight resets
- * margin/padding/border globally (a `* { margin: 0; ... }` rule in
- * @layer base), which also strips browser defaults Yasgui quietly relies on
- * — its own hosted demo has no such reset, so these are invisible there.
- */
+/* Unscoped: Yasgui builds its UI as plain DOM, outside Vue's scoped CSS. */
 
-/* Yasgui never sets its own line-height, so its table cells inherit our
-   app-wide line-height: 1.5 (meant for prose) instead of the browser's
-   normal ~1.2x-font-size default, making every row taller than intended. */
+/* Tailwind sets line-height 1.5, which makes Yasgui's table rows too tall. */
 .yasgui {
 	line-height: normal;
 }
 
-/* "Simple view" / "Ellipse" toggles: the checkbox's own default margin
-   would normally create this gap, but Tailwind's preflight zeroes it. */
+/* Tailwind's reset removes the checkbox margin that spaced these toggles. */
 .yasgui .tableControls .switch {
 	gap: 6px;
 }
 
-/* Dead link to Triply's docs, and an error-state link not useful here. */
+/* Links to Triply's docs and services. */
 .yasgui .yasr_external_ref_btn,
 .yasgui .yasr_tryQuery {
 	display: none !important;
 }
 
-/* Endpoint is chosen via our own dropdown above, and the request-config
-   panel (headers/method/graphs, each removable via an "X" button) isn't
-   exposed to users of this app — both replaced by app-configured endpoints. */
+/* Endpoints come from our dropdown, so hide Yasgui's endpoint field and request settings. */
 .yasgui .controlbar .autocompleteWrapper,
 .yasgui .tabContextButton,
 .yasgui .tabMenu {

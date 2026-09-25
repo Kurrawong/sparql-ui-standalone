@@ -3,8 +3,7 @@ import { join } from "node:path";
 import { parseEnv } from "node:util";
 import { proxySparql } from "./sparql-proxy.js";
 
-// Serves /api/sparql/<id> from `pnpm dev`, using SPARQL_* values from .env.local
-// (or the shell environment), so local development needs no platform tooling.
+// Serves /api/sparql/<id> during `pnpm dev`, with SPARQL_* values from .env.local or the shell.
 export function sparqlProxy() {
     return {
         name: "sparql-proxy",
