@@ -1,42 +1,25 @@
 <script lang="ts" setup>
-import { computed, onMounted, ref, useTemplateRef } from "vue";
+import { onMounted, ref, useTemplateRef } from "vue";
 import Yasgui from "@triply/yasgui";
 import "@triply/yasgui/build/yasgui.min.css";
-import { sparqlEndpoints as defaultEndpoints, type SparqlEndpointConfig } from "../endpoints";
-import { sampleQueries as defaultSampleQueries, type SampleQuery } from "../queries";
+import { sparqlEndpoints as endpoints } from "../endpoints";
+import { sampleQueries as queries, type SampleQuery } from "../queries";
 import { getSelectedEndpoint, setSelectedEndpoint, selectedEndpointName } from "../composables/useSparqlEndpoint";
-
-const props = defineProps<{
-	/** Overrides the built-in endpoint list — e.g. a downstream app's own config. */
-	endpoints?: SparqlEndpointConfig[];
-	/** Overrides the built-in sample-query list. */
-	sampleQueries?: SampleQuery[];
-}>();
-
-const endpoints = computed(() => props.endpoints ?? defaultEndpoints);
-const queries = computed(() => props.sampleQueries ?? defaultSampleQueries);
 
 const containerRef = useTemplateRef<HTMLDivElement>("container");
 const sidebarOpen = ref(true);
 
 let yasgui: Yasgui | undefined;
 
-function authHeaders(username?: string, password?: string): Record<string, string> {
-	if (username && password) {
-		return { Authorization: "Basic " + btoa(`${username}:${password}`) };
-	}
-	return {};
-}
-
 // Yasgui restores saved tabs (with their old endpoint and headers) from
 // localStorage, so each tab must be re-pointed at the dropdown's choice.
+// Headers are cleared because credentials only ever live server-side.
 function applySelectedEndpoint(tabId?: string) {
-	const entry = getSelectedEndpoint(endpoints.value);
 	const tab = yasgui?.getTab(tabId);
 	if (!tab) return;
 
-	tab.setEndpoint(entry.endpoint);
-	tab.setRequestConfig({ headers: authHeaders(entry.username, entry.password) });
+	tab.setEndpoint(getSelectedEndpoint().endpoint);
+	tab.setRequestConfig({ headers: {} });
 }
 
 function handleEndpointChange(event: Event) {
@@ -52,16 +35,15 @@ function loadSampleQuery(entry: SampleQuery) {
 }
 
 onMounted(() => {
-	if (endpoints.value.length === 0) return;
+	if (endpoints.length === 0) return;
 
-	const initial = getSelectedEndpoint(endpoints.value);
+	const initial = getSelectedEndpoint();
 	selectedEndpointName.value = initial.name;
 
 	yasgui = new Yasgui(containerRef.value!, {
 		requestConfig: {
 			endpoint: initial.endpoint,
 			method: "POST",
-			headers: authHeaders(initial.username, initial.password),
 		},
 		copyEndpointOnNewTab: true,
 		autofocus: true,

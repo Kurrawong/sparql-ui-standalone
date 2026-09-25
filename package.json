@@ -2,7 +2,7 @@
 	"name": "sparql-ui-standalone",
 	"version": "0.1.0",
 	"private": true,
-	"description": "Standalone, themeable SPARQL query UI (Yasgui) that runs as a static site with no backend framework required",
+	"description": "Themeable SPARQL query UI (Yasgui) as a static site, with an optional server-side proxy for endpoints that need a login",
 	"type": "module",
 	"scripts": {
 		"dev": "vite",

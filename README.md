@@ -1,81 +1,75 @@
 # sparql-ui-standalone
 
-Standalone SPARQL query UI built on [Yasgui](https://github.com/zazuko/Yasgui) (migrate from triply after styling fixes), packaged as a static site with no backend framework dependency. It's a Vue 3 + TypeScript + Vite app that builds to plain HTML/CSS/JS and can be hosted anywhere.
+Standalone SPARQL query UI built on [Yasgui](https://github.com/TriplyDB/Yasgui). It's a Vue 3 + TypeScript + Vite static site, plus a small platform-neutral proxy (`proxy/`) for endpoints that need a login. `proxy/azure/` is an optional adapter for deploying that proxy to Azure.
 
 ## Develop
 
 ```bash
 pnpm install
+cp .env.example .env.local   # only needed for endpoints behind the proxy
 pnpm dev
 ```
 
+`pnpm dev` also serves the proxy, through a Vite plugin (`proxy/vite-plugin.js`). No platform tooling is needed.
+
 ## Configuring endpoints
 
-The SPARQL endpoints shown in the dropdown from the values in `src/endpoints.json`. This is a static SPA with no backend, so anything in this file (including credentials) ships in plain text in the built JS bundle and is readable by anyone who opens devtools — fine for shared/low-sensitivity credentials that all authenticated users are allowed to access, not for anything that needs to stay hidden from the app's own users.
+There is one way to configure endpoints, in two parts:
 
-To get started, copy the example endpoints file and edit it:
+| Where | Holds | Who reads it |
+| --- | --- | --- |
+| `src/endpoints.json` (committed) | `[{ "name", "endpoint" }]` — never credentials | The browser. It's compiled into the page. |
+| Environment: `.env.local` locally, app settings when deployed | `SPARQL_<ID>_ENDPOINT`, plus optional `SPARQL_<ID>_USERNAME` and `SPARQL_<ID>_PASSWORD` | Only the proxy, on the server |
 
-```bash
-cp src/endpoints.example.json src/endpoints.json
-```
+- **Public endpoint:** list its real URL in `src/endpoints.json`.
+- **Endpoint that needs a login:** list `"/api/sparql/<id>"` in `src/endpoints.json`, and set `SPARQL_<ID>_ENDPOINT` (the real URL), `SPARQL_<ID>_USERNAME` and `SPARQL_<ID>_PASSWORD`. `<ID>` is the id in upper case, and ids use letters, digits and `_` only. For example, `/api/sparql/example` reads `SPARQL_EXAMPLE_*`. See `.env.example`.
+- The proxy (`proxy/sparql-proxy.js`) adds the login header and forwards the query, so the browser never sees the credentials. An id without settings returns a 404 naming the setting it expected.
 
-Without this file, the dropdown is simply empty. `src/endpoints.ts` globs `src/endpoints.json` in at build time. See "Keeping real credentials out of git and out of AI-agent context" below for what this does and doesn't protect against.
+`src/endpoints.ts` globs `/src/endpoints.json` at build time. The leading `/` resolves from the root of the app being built, so a downstream app's own file is used automatically.
 
-## Build
+## Build and deploy
 
 ```bash
 pnpm build
-pnpm preview
 ```
 
-`dist/` is a plain static site — deploy it to any static file host. No server runtime is required.
+`dist/` is a static site. To use the proxy in production, the host must also serve `POST /api/sparql/<id>` on the same origin. Do that with a small adapter around `proxySparql(id, request, env)` from `proxy/sparql-proxy.js`, which only uses standard `fetch`.
+
+**Azure Static Web Apps** (adapter in `proxy/azure/`):
+1. Assemble the function: `cp -r proxy/azure api && cp proxy/sparql-proxy.js api/src/`.
+2. Deploy `dist/` and `api/` together (`app_location: dist`, `api_location: api`).
+3. Set the `SPARQL_<ID>_*` values as app settings.
+
+See `sparql-ui-standalone-demo` for a complete deployment.
 
 ## Theming
 
-All components use Tailwind's semantic utility classes (`bg-background`, `text-foreground`, `border-border`, ...). Those classes are generated from the `@theme` tokens in `src/theme.css`. Reskinning the app means editing that one file -- no component changes needed.
+All components use Tailwind's semantic utility classes (`bg-background`, `text-foreground`, `border-border`, ...), generated from the `@theme` tokens in `src/theme.css`. Reskinning means editing that one file.
 
-For anything beyond colors and fonts, use `AppShell.vue`'s `title` prop and `logo` slot, or replace the whole bar with its `header`/`footer` slots, instead of forking the component. `SparqlEditor.vue` itself has no theming seams, since there's nothing org-specific about a query editor.
-
-## Docker
-
-A reference `Dockerfile` and `nginx.conf` are provided under `docker/` — they build the app and serve the static output with nginx:
-
-```bash
-docker build -f docker/Dockerfile -t sparql-ui-standalone .
-docker run --rm -p 8080:80 sparql-ui-standalone
-# → http://localhost:8080
-```
-
-Docker is not a requirement — `pnpm build` alone produces everything needed to deploy without it.
+For anything beyond colours and fonts, use `AppShell.vue`'s `title` prop and `logo` slot, or replace the whole bar with its `header`/`footer` slots.
 
 ## Consuming as a dependency
 
-This repo isn't published to a package registry yet. A consuming project can depend on it directly via git in the meantime:
-
 ```bash
-pnpm add git+https://github.com/Kurrawong/sparql-ui-standalone.git#v0.1.0
-```
-
-and import `SparqlEditor.vue` / `AppShell.vue` directly by path in its own app. Moving to a published package later only changes that install line.
-
-Because the components are consumed as source, the app must also depend on `@triply/yasgui` (and `vue`) directly, the same way `create-prez-app`'s template lists prez-ui's dependencies. Otherwise `vue-tsc` can't resolve them from the package's `.vue` files under pnpm:
-
-```bash
+pnpm add github:Kurrawong/sparql-ui-standalone#v0.1.0
 pnpm add @triply/yasgui@^4.2.28
 ```
 
-A downstream app contains only config, laid out the same way as this repo:
+The components are consumed as source, so the app must also depend on `@triply/yasgui` directly (as `create-prez-app`'s template does for prez-ui). Otherwise `vue-tsc` can't resolve it under pnpm.
+
+A downstream app contains only config, laid out like this repo:
 
 ```
 src/
-├── App.vue                # AppShell + SparqlEditor, plus its own header/footer slots
-├── main.ts                # standard Vite entry: createApp(App).mount("#app") + import "./theme.css"
-├── theme.css              # @import "sparql-ui-standalone/src/theme.css"; then @theme overrides
-├── endpoints.json         # gitignored; endpoints.example.json committed as a template
-└── queries/*.rq           # sample queries
+├── App.vue           # AppShell + SparqlEditor, plus its own header/footer slots
+├── main.ts           # createApp(App).mount("#app") + import "./theme.css"
+├── theme.css         # @import "sparql-ui-standalone/src/theme.css"; then @theme overrides
+├── endpoints.json    # names and URLs only
+└── queries/*.rq      # sample queries
+vite.config.ts        # plugins: [..., sparqlProxy()] from "sparql-ui-standalone/proxy/vite-plugin.js"
 ```
 
-No glue code is needed: this repo's `src/endpoints.ts` and `src/queries.ts` glob `/src/endpoints.json` and `/src/queries/*.rq`, and Vite resolves a leading `/` from the root of the app being built. That means they pick up the downstream app's files automatically. Likewise, `src/theme.css` declares `@source "./components"`, so importing it generates the utility classes these components need even from `node_modules`.
+`src/endpoints.ts` and `src/queries.ts` pick up the app's own files (see above), and `src/theme.css` declares `@source "./components"` so the components' utility classes are generated from `node_modules`. The proxy and its adapters come from this package, and are assembled at deploy time rather than copied into the app's repo.
 
 ```vue
 <script lang="ts" setup>
@@ -91,8 +85,8 @@ import SparqlEditor from "sparql-ui-standalone/src/components/SparqlEditor.vue";
 </template>
 ```
 
-`SparqlEditor.vue` also accepts optional `endpoints`/`sampleQueries` props (`SparqlEndpointConfig[]`/`SampleQuery[]`). They're for hosts that build these lists programmatically instead of from files, such as prez-ui later on.
+### Keeping credentials out of git and AI tools
 
-### Credential ignoring
-
-`src/endpoints.json` (see "Configuring endpoints" above) is gitignored, and this repo's `.claude/settings.json` denies Claude Code's own Read/Grep/Edit tools on it. A downstream app consuming this as a dependency should set up the same two things itself (gitignore + its own `.claude/settings.json` deny rule) for its own `src/endpoints.json`.
+Credentials only ever live in the `SPARQL_<ID>_*` settings:
+- **Locally** they're in `.env.local`. It's gitignored, and `.claude/settings.json` denies Claude Code's Read/Grep/Edit tools on it. Vite never exposes variables without a `VITE_` prefix to the browser.
+- **When deployed** they're app settings on the host.

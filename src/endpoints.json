@@ -8,9 +8,11 @@
 		"endpoint": "http://dbpedia.org/sparql"
 	},
 	{
-		"name": "GraphDB",
-		"endpoint": "https://example.org/repositories/example",
-		"username": "example-username",
-		"password": "example-password"
+		"name": "Dummy with Login",
+		"endpoint": "/api/sparql/example"
+	},
+	{
+		"name": "Dummy 2 with Login",
+		"endpoint": "/api/sparql/example2"
 	}
 ]

@@ -1,4 +1,5 @@
 import { ref } from "vue";
+import { sparqlEndpoints, type SparqlEndpointConfig } from "../endpoints";
 
 const STORAGE_KEY = "sparqlUiEndpointName";
 
@@ -15,8 +16,8 @@ function resolveInitialName(): string {
 /** Reactive across the app, e.g. so a header/footer can show the active endpoint. */
 export const selectedEndpointName = ref(resolveInitialName());
 
-export function getSelectedEndpoint<T extends { name: string }>(endpoints: T[]): T {
-	return endpoints.find((entry) => entry.name === selectedEndpointName.value) ?? endpoints[0];
+export function getSelectedEndpoint(): SparqlEndpointConfig {
+	return sparqlEndpoints.find((entry) => entry.name === selectedEndpointName.value) ?? sparqlEndpoints[0];
 }
 
 export function setSelectedEndpoint(name: string): void {

@@ -1,0 +1,9 @@
+{
+    "name": "sparql-ui-standalone-azure",
+    "private": true,
+    "type": "module",
+    "main": "src/functions/*.js",
+    "dependencies": {
+        "@azure/functions": "^4.16.5"
+    }
+}
